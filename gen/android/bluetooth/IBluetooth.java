@@ -1,6 +1,6 @@
 /*
  * This file is auto-generated.  DO NOT MODIFY.
- * Original file: C:\\Users\\Dexitor\\workspace\\xl-droidtooth-android\\src\\android\\bluetooth\\IBluetooth.aidl
+ * Original file: /home/dj/workspace/xl-droidtooth-android/src/android/bluetooth/IBluetooth.aidl
  */
 package android.bluetooth;
 /**
