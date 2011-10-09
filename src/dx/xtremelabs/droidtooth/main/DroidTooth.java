@@ -183,6 +183,10 @@ public class DroidTooth {
 		DroidToothInstance.get().setDeviceName(newName);
 	}
 	
+	public static void unpairDevice(String MAC) {
+		DroidToothInstance.get().unpairDevice(MAC);
+	}
+	
 	/**
 	 * Ease method for ensuring Bluetooth is on at times such as onResume(), etc...
 	 * 

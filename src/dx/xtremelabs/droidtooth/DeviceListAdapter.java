@@ -62,7 +62,7 @@ public class DeviceListAdapter extends BaseAdapter {
 		View row = view;
 		if (view == null){
 			row = View.inflate(activity, R.layout.device_row, null);
-		}
+		} 
 		FoundDevice device = getItem(position);
 		setRowName(row, device.DEVICE_NAME);
 		setRowDeviceState(row, device.DEVICE);
@@ -73,6 +73,8 @@ public class DeviceListAdapter extends BaseAdapter {
 			
 			//remove the extra tag that identifies this found device as a host
 			setRowName(row, device.DEVICE_NAME.substring(0, device.DEVICE_NAME.indexOf(Constants.DroidToothServerID)));
+		} else {
+			row.setBackgroundColor(Color.WHITE);
 		}
 		row.setTag(device);
 		row.setOnClickListener(new OnClickListener() {
@@ -84,12 +86,7 @@ public class DeviceListAdapter extends BaseAdapter {
 					
 					@Override
 					public void unpairDevices() {
-						IBluetooth ib = DroidToothInstance.get().getIBluetooth();
-						try {
-							ib.removeBond(device.DEVICE.getAddress());
-						} catch (RemoteException e) {
-							Log.e(Constants.DEBUG_DROIDTOOTH, "DroidTooth was unable to remove bonding from device: "+device.DEVICE_NAME+" ["+device.DEVICE.getAddress()+"]");
-						}
+						DroidToothInstance.get().unpairDevice(device.DEVICE_MAC);
 					}
 					
 					@Override
