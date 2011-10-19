@@ -578,6 +578,7 @@ public class DroidToothInstance {
 	public boolean isIndefinitelyDiscoverable(){
 		return becomeDiscoverableIndefinitely;
 	}
+	
 	/**
 	 * Start the intent for prompting the user to allow the request of
 	 * discoverability for the specified seconds. Essentially the method below
