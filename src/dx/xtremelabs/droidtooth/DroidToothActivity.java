@@ -58,7 +58,7 @@ public class DroidToothActivity extends Activity {
 		console = (EditText) findViewById(R.id.console);
 		deviceListContainer = (LinearLayout) findViewById(R.id.deviceListContainer);
 		extraButtons = (LinearLayout) findViewById(R.id.extra_buttons);
-		
+
 		action1 = (Button) findViewById(R.id.action1);
 		action1.setText("Radius Scan");
 
@@ -73,10 +73,10 @@ public class DroidToothActivity extends Activity {
 
 		indefDisco = (Button) findViewById(R.id.action5);
 		indefDisco.setText("Indefinite Discoverability");
-		
+
 		becomeDisco = (Button) findViewById(R.id.action6);
 		becomeDisco.setText("Become Visible");
-		
+
 		nameChange1 = (Button) findViewById(R.id.action7);
 		nameChange1.setText("Name1");
 
@@ -118,7 +118,7 @@ public class DroidToothActivity extends Activity {
 			@Override
 			public void onClick(View arg0) {
 				DroidToothActivity.this.clearScreens();
-				
+
 			}
 		});
 
@@ -129,7 +129,7 @@ public class DroidToothActivity extends Activity {
 				DroidTooth.becomeVisibleIndefinitely();
 			}
 		});
-		
+
 		becomeDisco.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -139,7 +139,7 @@ public class DroidToothActivity extends Activity {
 			}
 		});
 
-		
+
 
 		nameChange1.setOnClickListener(new OnClickListener() {
 
@@ -156,7 +156,7 @@ public class DroidToothActivity extends Activity {
 				DroidTooth.changeDeviceName("Dr.Dre");
 			}
 		});
-		
+
 		//become host
 		action3.setOnClickListener(new OnClickListener() {
 
@@ -171,7 +171,7 @@ public class DroidToothActivity extends Activity {
 					public void callback(){
 						action3.setText("Turn Off Host");
 						action3.setOnClickListener(new OnClickListener() {
-							
+
 							@Override
 							public void onClick(View arg0) {
 								DroidTooth.unteeth();
@@ -247,15 +247,18 @@ public class DroidToothActivity extends Activity {
 			}
 		});
 	}
-	
+
 	@Override
 	protected void onActivityResult (int requestCode, int resultCode, Intent data){
-		updateConsole("Bluetooth Intent Result: "+requestCode+", "+resultCode+", "+data);
-		if (resultCode == Activity.RESULT_OK){
-			updateConsole("This device will continue to be discoverable");
+		if(requestCode==DroidTooth.BLUETOOTH_DISCOVERABILITY_REQUEST){
+			if (resultCode == Activity.RESULT_OK){
+				updateConsole("This device will continue to be discoverable");
+
+			} else if (resultCode == Activity.RESULT_CANCELED){
+				DroidTooth.stopIndefiniteVisibility();
+				updateConsole("User cancelled discoverability");
+			}
 			
-		} else if (resultCode == Activity.RESULT_CANCELED){
-			updateConsole("User cancelled discoverability");
 		}
 	}
 
@@ -292,7 +295,7 @@ public class DroidToothActivity extends Activity {
 		deviceListView.setAdapter(listAdapter);
 		deviceListView.invalidate();
 	}
-	
+
 	public void updateConsole(String msg){
 		console.append(msg+"\n");
 	}

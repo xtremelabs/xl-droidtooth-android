@@ -56,6 +56,11 @@ public class DroidToothInstance {
 	// A local trigger without having an instantiated adapter to check whether
 	private boolean isScanning = false;
 
+	//a boolean set when someone wants their device to remain discoverable,
+	//and checked throughout the various listeners for whether to turn off
+	//discoverability based on user's input
+	private boolean becomeDiscoverableIndefinitely = false;
+	
 	// The asumption is that Bluetooth (BT) is off prior to using this app.
 	// If detected that BT was ON already, it will leave it ON when it finishes.
 	private boolean bluetoothPreviouslyOn = false;
@@ -560,6 +565,19 @@ public class DroidToothInstance {
 		becomeDiscoverable(DroidTooth.INDEFINITE_DISCOVERABLE_DURATION);
 	}
 
+	public void stopIndefiniteDiscoverability(){
+		becomeDiscoverableIndefinitely = false;
+		if (discoverabilityRunner==null){
+			return;
+		}
+		
+		//stop the running thread
+		discoverabilityRunner.stopRunner();
+	}
+	
+	public boolean isIndefinitelyDiscoverable(){
+		return becomeDiscoverableIndefinitely;
+	}
 	/**
 	 * Start the intent for prompting the user to allow the request of
 	 * discoverability for the specified seconds. Essentially the method below
@@ -570,10 +588,14 @@ public class DroidToothInstance {
 	 *            then the default discovery duration is used.
 	 */
 	public void forceBecomeDiscoverable(int durationInSeconds, boolean forced) {
-		if (discoverabilityRunner == null) {
+		if (discoverabilityRunner == null || discoverabilityRunner.isCancelled() || !discoverabilityRunner.isRunning()) {
 			discoverabilityRunner = new DiscoverabilityRunner(durationInSeconds);
 		}
 
+		if (durationInSeconds == DroidTooth.INDEFINITE_DISCOVERABLE_DURATION){
+			becomeDiscoverableIndefinitely = true;
+		}
+		
 		if (forced && discoverabilityRunner.isRunning()) {
 			discoverabilityRunner.stopRunner();
 		} else if (!forced && !discoverabilityRunner.isRunning()) {
@@ -597,7 +619,7 @@ public class DroidToothInstance {
 				discoverableIntent.putExtra(
 						BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION,
 						durationInSeconds);
-				activity.startActivity(discoverableIntent);
+				activity.startActivityForResult(discoverableIntent, DroidTooth.BLUETOOTH_DISCOVERABILITY_REQUEST);
 
 			}
 		});

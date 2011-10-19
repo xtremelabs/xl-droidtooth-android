@@ -1,6 +1,6 @@
 /*
  * This file is auto-generated.  DO NOT MODIFY.
- * Original file: /home/dj/workspace/xl-droidtooth-android/src/android/bluetooth/IBluetoothCallback.aidl
+ * Original file: /Users/xtremelabs/Documents/workspace/xl-droidtooth-android/src/android/bluetooth/IBluetoothCallback.aidl
  */
 package android.bluetooth;
 /**

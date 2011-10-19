@@ -38,6 +38,8 @@ public class DroidTooth {
 	public static final int INDEFINITE_DISCOVERABLE_DURATION = -755; //used as a trigger
 	public static final int DEFAULT_DISCOVERABLE_DURATION = MAXIMUM_DISCOVERABLE_DURATION;
 	public static final int DEFAULT_GRACE_SECONDS_AFTER_RADIUS_SCAN = 5;
+	public static final int BLUETOOTH_DISCOVERABILITY_REQUEST = 16; //random
+	
 
 	private static Activity activity;
 
@@ -175,8 +177,16 @@ public class DroidTooth {
 		DroidToothInstance.get().becomeDiscoverable(seconds);
 	}
 
+	public static void stopVisibility(){
+		DroidToothInstance.get().stopBeingDiscoverable();
+	}
+	
 	public static void becomeVisibleIndefinitely(){
 		DroidToothInstance.get().becomeDiscoverableIndefinitely();
+	}
+	
+	public static void stopIndefiniteVisibility(){
+		DroidToothInstance.get().stopIndefiniteDiscoverability();
 	}
 
 	public static void changeDeviceName(String newName){

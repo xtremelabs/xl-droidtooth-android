@@ -41,9 +41,10 @@ public class DiscoverabilityRunner extends Runner {
 	 * for connectivity.
 	 */
 	private void runIndefinitely(){
-		while(true){
+		while(true && DroidToothInstance.get().isIndefinitelyDiscoverable()){
 			DroidToothInstance.get().issueDiscoveryIntent(DroidTooth.MAXIMUM_DISCOVERABLE_DURATION);
-			SystemClock.sleep(DroidTooth.MAXIMUM_DISCOVERABLE_DURATION*1000);
+			SystemClock.sleep(DroidTooth.MAXIMUM_DISCOVERABLE_DURATION*1000); //TODO: rather than sleep every X-seconds to bring up the intent for discoverability,
+																			//tune in the event handler for when the device becomes discoverable or undiscoverable.
 		}
 	}
 
