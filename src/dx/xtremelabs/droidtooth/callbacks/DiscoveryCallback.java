@@ -1,5 +1,7 @@
 package dx.xtremelabs.droidtooth.callbacks;
 
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 
 /**
@@ -9,7 +11,7 @@ import android.bluetooth.BluetoothSocket;
  * @author Dritan Xhabija
  *
  */
-public abstract class NewIncomingServerConnectionCallback implements DTCallback {
+public abstract class DiscoveryCallback implements DTCallback {
 
 	@Override
 	public void callback() {//client code to do something when a device is found
@@ -28,10 +30,18 @@ public abstract class NewIncomingServerConnectionCallback implements DTCallback 
 	 * @return a BluetoothSocket object
 	 */
 	public BluetoothSocket getIncomingSocketFromObject(Object o){
-		if (!(o instanceof BluetoothSocket)){
-			return null;
-		}
+		
 		return (BluetoothSocket) o;
 	}
+	
+	public boolean discoveryStarted(Object o){
+		return ((String)o).equals(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
+	}
+	
+	public boolean discoveryFinished(Object o){
+		return ((String)o).equals(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
+	}
+	
+	
 
 }

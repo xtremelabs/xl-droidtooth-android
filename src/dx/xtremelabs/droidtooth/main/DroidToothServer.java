@@ -35,6 +35,7 @@ public class DroidToothServer extends AsyncTask<Integer, Void, Void> {
 	private UUID uuid;
 	
 	private boolean isRunning = false;
+	private boolean wasRunning = false;
 	
 	private NewIncomingServerConnectionCallback newConnection;
 	private DTCallback serverStartedCallback;
@@ -93,6 +94,10 @@ public class DroidToothServer extends AsyncTask<Integer, Void, Void> {
 	
 	public boolean isRunning() {
 		return isRunning;
+	}
+	
+	public boolean wasRunning(){
+		return wasRunning;
 	}
 
 	/**
@@ -182,6 +187,7 @@ public class DroidToothServer extends AsyncTask<Integer, Void, Void> {
 				
 				shutdownServer();
 				isRunning = false;
+				wasRunning = true;
 				break;
 			}
 		}

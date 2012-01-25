@@ -23,7 +23,7 @@ import dx.xtremelabs.droidtooth.exceptions.NoBluetoothDeviceFound;
  * The purpose of DroidTooth is to simplify the life of an Android developer who has to deal
  * with Bluetooth. While it is fairly easy already to work on Bluetooth and Android, this
  * Library provides 1-liner functions for complex tasks. Searching for any devices around you
- * should be a matter of issuing a single call to a method that does just that, like sniff().
+ * should be a matter of issuing a single call to a method that does just that, like scanRadius().
  * 
  * Likewise, pairing between devices should also be as trivial in today's digital era.
  *  
@@ -70,19 +70,27 @@ public class DroidTooth {
 		scanRadius(scanningStarted, deviceFoundCallback, false, null);
 	}
 
+	public static void scanRadius(final DTCallback scanningStartedCallback, final DeviceFoundCallback deviceFoundCallback, boolean keepAlive, final String targetDeviceName)  {
+		scanRadius(scanningStartedCallback, null, deviceFoundCallback, keepAlive, targetDeviceName);
+	}
+	
 	/**
 	 * Scan for any visible devices and return them in an array list.
 	 * Assumes init() is called first.
 	 * 
 	 * @param scanningStartedCallback a notifier for pinging back the user when scanning starts
+	 * @param scanningFinishedCallback a callback for when scanning terminates
 	 * @param deviceFoundCallback object to be called back once a device is found.
 	 * @param keepAlive whether or not to leave bluetooth on after it's done scanning
 	 * @param targetDeviceName stop scanning once it finds targetDeviceName if present, 
 	 * 			if null, scanning continues as normally
 	 */
-	public static void scanRadius(final DTCallback scanningStartedCallback, final DeviceFoundCallback deviceFoundCallback, boolean keepAlive, final String targetDeviceName)  {
+	public static void scanRadius(final DTCallback scanningStartedCallback, final DTCallback scanningFinishedCallback, final DeviceFoundCallback deviceFoundCallback, boolean keepAlive, final String targetDeviceName)  {
 		Log.d(Constants.DEBUG_DROIDTOOTH, "Starting to scan radius....");
+		
 		DroidToothInstance.get().setDiscoveryStartedCallback(scanningStartedCallback);
+		DroidToothInstance.get().setDiscoveryFinishedCallback(scanningFinishedCallback);
+		
 		if (targetDeviceName==null){
 			//set the interesting callback for every found device 
 			DroidToothInstance.get().setOnDeviceFoundCallback(deviceFoundCallback);
@@ -135,7 +143,7 @@ public class DroidTooth {
 				public void callback() {
 					Log.d(Constants.DEBUG_DROIDTOOTH, "Doing post-discovery processes....");
 
-					//create a new "thread" that waits in the background graceful-seconds then
+					//create a new "thread" that waits in the background for some graceful seconds then
 					//tries to turn off
 					new AsyncTask<Integer, Void, Void> (){
 
@@ -204,14 +212,10 @@ public class DroidTooth {
 	 */
 	public static boolean ensureBluetoothIsOn(){
 		if (!DroidToothInstance.get().isOn()){
-			if (DroidToothInstance.get().initBluetooth()){
-				return true; //return true if the initBluetooth() was successful 
-			}
+			return DroidToothInstance.get().initBluetooth(); //return whether if the initBluetooth() was successful
 		} else { //if BT was on already, return it's ON now
 			return true;
 		}
-		//will only get here if initBluetooth() returns false;
-		return false;
 	}
 	
 	/**
@@ -237,6 +241,7 @@ public class DroidTooth {
 	public static boolean teeth(DTCallback serverStartedCallback, NewIncomingServerConnectionCallback incomingServerConnectionCallback){
 		return teeth(null, 0, serverStartedCallback, incomingServerConnectionCallback);
 	}
+	
 	/**
 	 * Become a Bluetooth host awaiting incoming connections. The name of the method
 	 * depicts a group of individual tooth()'s that want to join the teeth(name) group.

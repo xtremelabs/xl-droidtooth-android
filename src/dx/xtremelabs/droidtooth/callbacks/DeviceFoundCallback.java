@@ -1,4 +1,4 @@
-package dx.xtremelabs.droidtooth.callbacks;
+ package dx.xtremelabs.droidtooth.callbacks;
 
 import dx.xtremelabs.droidtooth.common.Constants;
 import dx.xtremelabs.droidtooth.common.FoundDevice;

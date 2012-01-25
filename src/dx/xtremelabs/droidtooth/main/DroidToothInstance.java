@@ -259,7 +259,10 @@ public class DroidToothInstance {
 	 * @return
 	 */
 	public DroidToothServer getDroidToothServer() {
-		return new DroidToothServer(droidTooth);
+		return droidToothServer == null || droidToothServer.wasRunning() ? 
+																			droidToothServer = new DroidToothServer(droidTooth)
+																		 : 
+																			droidToothServer;
 	}
 
 	/**
@@ -330,6 +333,13 @@ public class DroidToothInstance {
 		((DTDiscoveryStateListener) discoveryStateListener)
 				.setDiscoveryStartedCallback(callback);
 	}
+	
+	public void setDiscoveryFinishedCallback(DTCallback callback) {
+		((DTDiscoveryStateListener) discoveryStateListener)
+				.setDiscoveryFinishedCallback(callback);
+	}
+	
+	
 
 	/**
 	 * Return the last updated status of the Bluetooth device.
@@ -438,7 +448,7 @@ public class DroidToothInstance {
 		if (droidTooth == null) {
 			return DISCOVERY_ADAPTER_NULL;
 		}
-
+		
 		int returnValue = DISCOVERY_STARTED; // default value
 
 		if (droidTooth.isDiscovering()) { // if device is currently scanning
@@ -485,7 +495,7 @@ public class DroidToothInstance {
 	}
 
 	/**
-	 * Try and turn off the Bluetooth device. If param is passed is True, it
+	 * Try and turn off the Bluetooth device. If 'gracefully' is passed is True, it
 	 * will restore the state of Bluetooth as it was prior to DroidTooth
 	 * interfacing with the BT device. Also, receivers will not be unregistered
 	 * from the main activity. If gracefully = False, then any discovery process
@@ -505,21 +515,20 @@ public class DroidToothInstance {
 		if (droidTooth == null) {
 			return true;
 		}
-
+		
 		if (gracefully) {
 			if (bluetoothPreviouslyOn && !droidTooth.isEnabled()) {
 				droidTooth.enable();
 				return false; // bluetooth was not turned off
 			}
 			// keep reigstered listeners intact
-		} else {
-			if (droidTooth.isDiscovering()) {
+		} else if (droidTooth.isDiscovering()) {
 				droidTooth.cancelDiscovery();
-			}
-
-			// unregister all declared listeners
-			unregisterListeners();
 		}
+		
+		// unregister all declared listeners
+		unregisterListeners();
+
 		// disable which turns off Bluetooth
 		return droidTooth.disable();
 	}

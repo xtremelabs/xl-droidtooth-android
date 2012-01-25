@@ -31,10 +31,10 @@ public class DroidToothClient extends AsyncTask<Void, Void, Void> {
 	private BluetoothSocket socketWithHost;
 
 	private UUID uuid;
-	
+
 
 	private NewOutgoingClientConnectionCallback newConnection;
-	
+
 	private boolean isConnected = false;
 
 	public DroidToothClient(BluetoothDevice hostDevice, UUID uuid){
@@ -73,25 +73,29 @@ public class DroidToothClient extends AsyncTask<Void, Void, Void> {
 		if (socketWithHost==null){
 			initConnectionWithHost();
 		}
-		
+		//		if (socketWithHost==null){
+		//			return null;
+		//		}
+
 		//initialize server socket
 		BluetoothSocket incomingDevice;
-		while (true){
-			 
-			
-			try {
-				//attempt to connect to server
-				socketWithHost.connect();
-			} catch (IOException e) {
-				Log.d(Constants.DEBUG_DROIDTOOTH, "Unable to connect client with host "+hostDevice.getName()+" because: "+e);
-				 return null;
-			}
-			
-			//issue a callback to those interested clients
-			if (newConnection!=null){
-				newConnection.callback(socketWithHost);
-			}
+
+
+
+		try {
+			//attempt to connect to server
+			socketWithHost.connect();
+		} catch (IOException e) {
+			Log.d(Constants.DEBUG_DROIDTOOTH, "Unable to connect client with host "+hostDevice.getName()+" because: "+e);
+			return null;
 		}
+
+		//issue a callback to those interested clients
+		if (newConnection!=null){
+			newConnection.callback(socketWithHost);
+		}
+		return null;
+		
 	}
 
 	public void closeConnectionWithHost(){

@@ -19,6 +19,7 @@ public class Constants {
 	//these pre-defined UUIDs can be used brute force and authentication on any default DroidTooth BT teeth() 
 	//found while scanning.
 	public final static String [] KNOWN_UUIDS = { 
+													"00001101-0000-1000-8000-00805f9b34fb", //Default UUID for pairing with other devices
 													"D1201D70-011D-121A-1177-11AB11A77100",
 													"3892a9a1-095a-42b8-a0f9-afd761bf1860",
 													"e96e897c-b8a6-4a1e-8f15-76bb6ebb3b3b"

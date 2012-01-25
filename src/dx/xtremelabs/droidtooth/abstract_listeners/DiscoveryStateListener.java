@@ -34,7 +34,7 @@ public abstract class DiscoveryStateListener extends BroadcastReceiver {
 		} else if (intent.getAction().equals(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)){ 
 			Log.d(Constants.DEBUG_DROIDTOOTH, "DroidTooth detected that Bluetooth discovery has finished.");
 			lastDiscoveryTime = new Date().getTime();
-			currentState = BluetoothAdapter.ACTION_DISCOVERY_STARTED;
+			currentState = BluetoothAdapter.ACTION_DISCOVERY_FINISHED;
 			discoveryFinished();
 		} 
 	
@@ -48,8 +48,13 @@ public abstract class DiscoveryStateListener extends BroadcastReceiver {
 		return currentState;
 	}
 	
+	public boolean hasDiscoveryFinished() {
+		return currentState.equals(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
+	}
+	public boolean hasDiscoveryStarted() {
+		return currentState.equals(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
+	}
 	
 	public abstract void discoveryStarted();
 	public abstract void discoveryFinished();
-
 }
