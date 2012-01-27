@@ -3,6 +3,7 @@ package dx.xtremelabs.droidtooth.common;
 import java.util.Date;
 
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothSocket;
 
 /**
  * 
@@ -18,10 +19,11 @@ import android.bluetooth.BluetoothDevice;
  */
 public class FoundDevice {
 
-	public String DEVICE_NAME;
-	public String DEVICE_MAC;
-	public BluetoothDevice DEVICE;
-	public Date DEVICE_FOUND_TIME;
+	final public String DEVICE_NAME;
+	final public String DEVICE_MAC;
+	final public Date DEVICE_FOUND_TIME;
+	final public BluetoothDevice DEVICE;
+	private BluetoothSocket socket;
 	
 	/**
 	 * Wrapper for these objects as well as a timestamp of creation, which is assumed
@@ -34,5 +36,13 @@ public class FoundDevice {
 		DEVICE_MAC = device.getAddress();
 		DEVICE = device;
 		DEVICE_FOUND_TIME = new Date(); 
+	}
+	
+	public void setSocket(BluetoothSocket socket){
+		this.socket = socket;
+	}
+	
+	public BluetoothSocket getSocket(){
+		return socket;
 	}
 }

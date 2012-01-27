@@ -1,10 +1,12 @@
 package dx.xtremelabs.droidtooth.main;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.UUID;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothSocket;
 import android.os.AsyncTask;
 import android.os.SystemClock;
 import android.util.Log;
@@ -39,7 +41,7 @@ public class DroidTooth {
 	public static final int DEFAULT_DISCOVERABLE_DURATION = MAXIMUM_DISCOVERABLE_DURATION;
 	public static final int DEFAULT_GRACE_SECONDS_AFTER_RADIUS_SCAN = 5;
 	public static final int BLUETOOTH_DISCOVERABILITY_REQUEST = 16; //random
-	
+
 
 	private static Activity activity;
 
@@ -73,7 +75,7 @@ public class DroidTooth {
 	public static void scanRadius(final DTCallback scanningStartedCallback, final DeviceFoundCallback deviceFoundCallback, boolean keepAlive, final String targetDeviceName)  {
 		scanRadius(scanningStartedCallback, null, deviceFoundCallback, keepAlive, targetDeviceName);
 	}
-	
+
 	/**
 	 * Scan for any visible devices and return them in an array list.
 	 * Assumes init() is called first.
@@ -87,10 +89,10 @@ public class DroidTooth {
 	 */
 	public static void scanRadius(final DTCallback scanningStartedCallback, final DTCallback scanningFinishedCallback, final DeviceFoundCallback deviceFoundCallback, boolean keepAlive, final String targetDeviceName)  {
 		Log.d(Constants.DEBUG_DROIDTOOTH, "Starting to scan radius....");
-		
+
 		DroidToothInstance.get().setDiscoveryStartedCallback(scanningStartedCallback);
 		DroidToothInstance.get().setDiscoveryFinishedCallback(scanningFinishedCallback);
-		
+
 		if (targetDeviceName==null){
 			//set the interesting callback for every found device 
 			DroidToothInstance.get().setOnDeviceFoundCallback(deviceFoundCallback);
@@ -188,11 +190,11 @@ public class DroidTooth {
 	public static void stopVisibility(){
 		DroidToothInstance.get().stopBeingDiscoverable();
 	}
-	
+
 	public static void becomeVisibleIndefinitely(){
 		DroidToothInstance.get().becomeDiscoverableIndefinitely();
 	}
-	
+
 	public static void stopIndefiniteVisibility(){
 		DroidToothInstance.get().stopIndefiniteDiscoverability();
 	}
@@ -200,11 +202,11 @@ public class DroidTooth {
 	public static void changeDeviceName(String newName){
 		DroidToothInstance.get().setDeviceName(newName);
 	}
-	
+
 	public static void unpairDevice(String MAC) {
 		DroidToothInstance.get().unpairDevice(MAC);
 	}
-	
+
 	/**
 	 * Ease method for ensuring Bluetooth is on at times such as onResume(), etc...
 	 * 
@@ -217,9 +219,9 @@ public class DroidTooth {
 			return true;
 		}
 	}
-	
+
 	/**
-	 * Start a new teeth() group or shutdown existing and start again.
+	 * Start a new teeth() "group" or shutdown existing and start again.
 	 * @param incomingServerConnectionCallback
 	 * @param serverStartedCallback
 	 * @return 
@@ -241,7 +243,7 @@ public class DroidTooth {
 	public static boolean teeth(DTCallback serverStartedCallback, NewIncomingServerConnectionCallback incomingServerConnectionCallback){
 		return teeth(null, 0, serverStartedCallback, incomingServerConnectionCallback);
 	}
-	
+
 	/**
 	 * Become a Bluetooth host awaiting incoming connections. The name of the method
 	 * depicts a group of individual tooth()'s that want to join the teeth(name) group.
@@ -297,8 +299,12 @@ public class DroidTooth {
 	}
 
 
+	/**
+	 * Simply try to connect to given host 
+	 * @param broadcastingName
+	 */
 	public static void tooth(final String broadcastingName){
-		tooth(broadcastingName, 0, null, null, null);
+		tooth(broadcastingName, 0, null, null, null, null);
 	}
 
 	/**
@@ -308,8 +314,8 @@ public class DroidTooth {
 	 * @param outgoingClientConnectionCallback when a connection is established callback
 	 * @param newDeviceFound when a new device is found while scanning callback
 	 */
-	public static void tooth(String broadcastingName, int uuidIndexKey, DTCallback scanningStartedCallback, NewOutgoingClientConnectionCallback outgoingClientConnectionCallback, final DeviceFoundCallback newDeviceFound){
-		tooth(broadcastingName, Utils.getKnownUUID(uuidIndexKey), scanningStartedCallback, outgoingClientConnectionCallback, newDeviceFound);
+	public static void tooth(String broadcastingName, int uuidIndexKey, DTCallback scanningStartedCallback, NewOutgoingClientConnectionCallback outgoingClientConnectionCallback, final DeviceFoundCallback newDeviceFound, DefaultCallback errorOccurred){
+		tooth(broadcastingName, Utils.getKnownUUID(uuidIndexKey), scanningStartedCallback, outgoingClientConnectionCallback, newDeviceFound, errorOccurred);
 	}
 
 	/**
@@ -318,8 +324,8 @@ public class DroidTooth {
 	 * @param callback
 	 * @param newDeviceFound
 	 */
-	public static void tooth(DTCallback scanningStartedCallback, NewOutgoingClientConnectionCallback callback, DeviceFoundCallback newDeviceFound){
-		tooth(null, 0, scanningStartedCallback, callback, newDeviceFound);
+	public static void tooth(DTCallback scanningStartedCallback, NewOutgoingClientConnectionCallback callback, DeviceFoundCallback newDeviceFound, DefaultCallback errorOccurred){
+		tooth(null, 0, scanningStartedCallback, callback, newDeviceFound, errorOccurred);
 	}
 
 	/**
@@ -331,7 +337,7 @@ public class DroidTooth {
 	 * @param callback
 	 * @param newDeviceFound
 	 */
-	public static void tooth(final String broadcastingName, final UUID uuid, DTCallback scanningStartedCallback, final NewOutgoingClientConnectionCallback callback, final DeviceFoundCallback newDeviceFound){
+	public static void tooth(final String broadcastingName, final UUID uuid, DTCallback scanningStartedCallback, final NewOutgoingClientConnectionCallback callback, final DeviceFoundCallback newDeviceFound, final DefaultCallback errorOccurred){
 
 		//first we need to do a scan of the 15m BT radius
 		DroidTooth.scanRadius(scanningStartedCallback, new DeviceFoundCallback() {
@@ -346,16 +352,17 @@ public class DroidTooth {
 					//stop discovering once found the desired teeth() group.
 					if (DroidToothInstance.get().stopDiscovery()){
 						//attempt to start a handshake for the given device object and UUID
-						DroidToothClient handshake = tooth(newDevice.DEVICE, Utils.getKnownUUID(0), callback);
+						DroidToothClient handshake = tooth(newDevice, Utils.getKnownUUID(0), callback, errorOccurred);
 						tooths.put(broadcastingName, handshake);
+						newDevice.setSocket(handshake.getSocket()); //wait until we get a socket
 					}
 				}  else if (broadcastingName == null && Utils.isHost(newDevice.DEVICE_NAME)){	//if we detected a host using default DroidTooth library
-						//attempt to pair with the device
-						DroidToothClient handshake = tooth(newDevice.DEVICE, Utils.getKnownUUID(0), callback);
-						//keep track of all existing threaded clients
-						tooths.put(broadcastingName, handshake);
+					//attempt to pair with the device
+					DroidToothClient handshake = tooth(newDevice, Utils.getKnownUUID(0), callback, errorOccurred);
+					//keep track of all existing threaded clients
+					tooths.put(broadcastingName, handshake);
 				} 
-				
+
 				//keep any interested clients notified when a device was found.
 				if (newDeviceFound!=null){
 					newDeviceFound.callback(o);
@@ -365,14 +372,18 @@ public class DroidTooth {
 	}
 
 	/**
-	 * Attempt to pair to the found device while scanning.
-	 * @param device
-	 * @param uuid
+	 * Attempt to connect (pair) to the found device while scanning. 
+	 * @param device device we already know about from the past
+	 * @param uuid the agreed UUID
+	 * @param newOutgoingClientConnectionCallback a callback for when the client pairs successfully
+	 * @param errorOccurred a callback if there were any errors
+	 * @return An already started threaded client for your pleasure to refer to
 	 */
-	public static DroidToothClient tooth(BluetoothDevice device, UUID uuid, NewOutgoingClientConnectionCallback newOutgoingClientConnectionCallback){
+	public static DroidToothClient tooth(FoundDevice device, UUID uuid, NewOutgoingClientConnectionCallback newOutgoingClientConnectionCallback, DefaultCallback errorOccurred){
 		if (device == null){
 			return null;
 		}
+
 		DroidToothClient handshake = new DroidToothClient(device, uuid);
 		handshake.setNewOutgoingClientConnectionCallback(newOutgoingClientConnectionCallback);
 		handshake.execute(); //initiate the handshake connection
@@ -380,24 +391,24 @@ public class DroidTooth {
 	}
 
 	/**
-	 * Cloase a specific connection established to the specified broadcast name
+	 * Close a specific connection established to the specified broadcast name
 	 * or close all connections if "null" is specified.
-	 * @param broadcastName
+	 * @param broadcastName the name of the device to close connection to, or
+	 * 			if null then all connections will be closed.
 	 */
 	public static void untooth(String broadcastName){
 		if (broadcastName!=null){
-			if (tooths.containsKey(broadcastName)){
-				tooths.get(broadcastName).closeConnectionWithHost();
-				tooths.remove(tooths.get(broadcastName));
+			if (tooths.containsKey(broadcastName)){ 
+				tooths.get(broadcastName).closeConnectionWithHost(); //close connection
+				tooths.remove(tooths.get(broadcastName)); //cleanup
 			}
 		} else {
 			for(DroidToothClient client : tooths.values()){
 				client.closeConnectionWithHost();
 			}
-			tooths = new HashMap<String, DroidToothClient>();
+			tooths.clear(); //rather than wait for g.c. to handle that old memory, do it now.
 		}
 	}
-
 
 	public static void releaseResources(boolean turnOffBluetooth){
 		//turn off bluetooth server if still running
@@ -412,5 +423,39 @@ public class DroidTooth {
 			DroidToothInstance.get().unregisterListeners();
 		}
 
+	}
+
+	/**
+	 * Return the now-useless AsyncTask because it served
+	 * it's main purpose to establish a pairing request
+	 * with a client. However we can still use it's shell
+	 * to inquire about the connection it established. 
+	 * @return any known clients
+	 */
+	private static DroidToothClient getClient(String name){
+		if (tooths.containsKey(name)){
+			return tooths.get(name);
+		}
+		return null;
+	}
+	/**
+	 * Return the currently connected device.
+	 * @return
+	 */
+	public static boolean isDeviceAlive(FoundDevice device){
+		if (device == null || device.getSocket() == null){
+			return false;
+		}
+		
+		try {
+			if (device.getSocket().getInputStream().read()>-1000){
+				return true; //we were able to communicate with the device
+			}
+		} catch (IOException e) {
+			//we are unable to communicate with this socket
+			return false; 
+		}
+		//finally all is well and we can read a single byte
+		return true;
 	}
 }

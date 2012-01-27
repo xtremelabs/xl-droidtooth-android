@@ -92,17 +92,17 @@ public class DeviceListAdapter extends BaseAdapter {
 					@Override
 					public void pairDevice() {
 						//todo: auto get the next available UUID index
-						DroidToothClient handshakeInitiatedObject = DroidTooth.tooth(device.DEVICE, Utils.getKnownUUID(0), new NewOutgoingClientConnectionCallback() {
+						DroidToothClient handshakeInitiatedObject = DroidTooth.tooth(device, Utils.getKnownUUID(0), new NewOutgoingClientConnectionCallback() {
 							@Override
 							public void callback(Object o){
 								//grab the new socket connection established with this device
 								BluetoothSocket socket = this.getOutgoingSocketFromObject(o);
 								Log.d(Constants.DEBUG_DROIDTOOTH, "Pairing was Successful! Got socket: "+socket);
 							}
-						});
+						}, null);
 					}
 				});
-				Log.d(Constants.DEBUG_DROIDTOOTH, "CLICKED O NDEVICE: "+device.DEVICE_NAME+" with Address: "+device.DEVICE.getAddress());
+				Log.d(Constants.DEBUG_DROIDTOOTH, "CLICKED ON DEVICE: "+device.DEVICE_NAME+" with Address: "+device.DEVICE.getAddress());
 				Toast.makeText(activity, "Clicked on Device: "+device.DEVICE_NAME+" with Address: "+device.DEVICE.getAddress(), Toast.LENGTH_LONG);
 			}
 		});

@@ -460,7 +460,6 @@ public class DroidToothInstance {
 				returnValue = DISCOVERY_RESTARTED;
 			}
 		}
-
 		droidTooth.startDiscovery();
 		return returnValue;
 	}
@@ -516,12 +515,17 @@ public class DroidToothInstance {
 			return true;
 		}
 		
+		//graceful mode, if BT was ON prior to running your app
+		//leave it on when you exit
 		if (gracefully) {
+			//if when we first got a hold of the BluetoothDevice we found out that 
+			//it was ON prior to us requesting it to be enabled but for some 
+			//strange reason the device is OFF (due to mingling with the adapter),
+			//we are graceful towards leaving it in the original state which was ON
 			if (bluetoothPreviouslyOn && !droidTooth.isEnabled()) {
-				droidTooth.enable();
+				droidTooth.enable(); //turn ON Bluetooth
 				return false; // bluetooth was not turned off
 			}
-			// keep reigstered listeners intact
 		} else if (droidTooth.isDiscovering()) {
 				droidTooth.cancelDiscovery();
 		}
@@ -529,7 +533,7 @@ public class DroidToothInstance {
 		// unregister all declared listeners
 		unregisterListeners();
 
-		// disable which turns off Bluetooth
+		// disable which turns OFF Bluetooth
 		return droidTooth.disable();
 	}
 

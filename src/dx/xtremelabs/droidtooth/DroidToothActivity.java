@@ -230,7 +230,7 @@ public class DroidToothActivity extends Activity {
 						deviceListView.invalidate();
 						DroidToothActivity.this.updateConsole("Found device "+scannedDevice.DEVICE_NAME+" with address: "+scannedDevice.DEVICE.getAddress()+" while trying to tooth().");
 					}
-				});
+				}, null);
 
 			}
 		});
