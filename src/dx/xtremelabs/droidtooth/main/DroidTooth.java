@@ -1,11 +1,9 @@
 package dx.xtremelabs.droidtooth.main;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.UUID;
 
 import android.app.Activity;
-import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.os.AsyncTask;
 import android.os.SystemClock;
@@ -439,23 +437,48 @@ public class DroidTooth {
 		return null;
 	}
 	/**
-	 * Return the currently connected device.
+	 * Return whether the device is turned on. Prior to using this function,
+	 * a pairing might have happened and after a certain period of inactivity
+	 * the host (mouse, keyboard, input device) might timeout and when the client
+	 * attempts to communicate with it via its input/output streams it will
+	 * have to wait because read/write are blocking calls. 
+	 * 
+	 * This method attempts to purely re-establish a connection with the device.
 	 * @return
 	 */
-	public static boolean isDeviceAlive(FoundDevice device){
-		if (device == null || device.getSocket() == null){
+	public static boolean isDeviceAlive(FoundDevice device, UUID uuid){
+		if (device == null){
 			return false;
 		}
 		
 		try {
-			if (device.getSocket().getInputStream().read()>-1000){
-				return true; //we were able to communicate with the device
-			}
-		} catch (IOException e) {
-			//we are unable to communicate with this socket
+			//If this succeeds then the device was OFF but is ON again however it lost track
+			//of whom it was already paired to.
+			BluetoothSocket socket = device.DEVICE.createRfcommSocketToServiceRecord(uuid);
+			
+			Log.d(Constants.DEBUG_DROIDTOOTH, "was able to re-pair with socket: "+socket.getInputStream());
+			
+			socket.connect();
+			Log.d(Constants.DEBUG_DROIDTOOTH, "____reading from socket socket: "+socket.getInputStream().read());
+			 //Device was off and willing to re-establish communication. 
+			socket.close(); //close this test socket to relinquish access to a socket that matters.
+			
+			//finally all is well, the device is "alive" and is awaiting connections.
+			return true;
+		} catch (Exception e) {
+			//the device is already connected and is using the sockets!
+			if (e.toString().contains("busy")){
+				return true; //is alive for sure
+			} 
+			
+			//We are unable to communicate with the device, as in, it cannot be seen as being visible
+			//in the spectrum of bluetooth radios (regardless of whether it's broadcasting its name)
+			Log.d(Constants.DEBUG_DROIDTOOTH, "Could not verify whether device is alive: "+e);
+			
+			//device is "dead" (beef) 
 			return false; 
 		}
-		//finally all is well and we can read a single byte
-		return true;
+		
+
 	}
 }
