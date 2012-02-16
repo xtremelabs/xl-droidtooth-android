@@ -114,7 +114,7 @@ public class DroidTooth {
 		//check if BT is already on, if so, simply start discovering
 		if (DroidToothInstance.get().isOn()){
 			Log.d(Constants.DEBUG_DROIDTOOTH, "Bluetooth already ON, starting discovery");
-			DroidToothInstance.get().startDiscovery();
+			DroidToothInstance.get().forceDiscovery();
 		} else if (!DroidToothInstance.get().initBluetooth()){ //try initializing bluetooth
 			return; //early termination if unable to init
 		}
