@@ -384,6 +384,7 @@ public class DroidTooth {
 
 		DroidToothClient handshake = new DroidToothClient(device, uuid);
 		handshake.setNewOutgoingClientConnectionCallback(newOutgoingClientConnectionCallback);
+		handshake.setErrorOccurredCallback(errorOccurred);
 		handshake.execute(); //initiate the handshake connection
 		return handshake;
 	}
